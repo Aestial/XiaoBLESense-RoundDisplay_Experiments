@@ -1,158 +1,34 @@
-/**
- *
- * To create the images as C arrays, visit:
- * https://notisrac.github.io/FileToCArray/
- *
- */
-#include <SPI.h>
+#include <goblin3d.h> // Include the Goblin3D library for 3D rendering
 #include <I2C_BM8563.h>
-
 #include "LSM6DS3.h"
+#include <SD.h>
+#include <SPI.h>
+#include "ObjModel.h"
 #include "Wire.h"
 
 // #define USE_ARDUINO_GFX_LIBRARY
 #define USE_TFT_ESPI_LIBRARY
 #include "lv_xiao_round_screen.h"
 
-#include <goblin3d.h> // Include the Goblin3D library for 3D rendering
-
 #define MAX_IMAGE_WIDTH 240
-
-int tftStatus = 0;
-
-I2C_BM8563 rtc(I2C_BM8563_DEFAULT_ADDRESS, Wire);
-const int chipSelect = D2;
-
-TFT_eSprite face = TFT_eSprite(&tft);
-
-goblin3d_obj_t cube; // Declare a 3D object using the Goblin3D structure
-
-#define CLOCK_R 260.0f
+#define SD_CS_PIN D2
 #define TFT_GREY 0xBDF7
 
+I2C_BM8563 rtc(I2C_BM8563_DEFAULT_ADDRESS, Wire);
 LSM6DS3 myIMU(I2C_MODE, 0x6A); // I2C device address 0x6A
+ObjModel objModel(tft); // Create an instance of the ObjModel class
+// TFT_eSprite img = TFT_eSprite(&tft); // Sprite to be used as frame buffer
 
-float sx = 0, sy = 1, mx = 1, my = 0, hx = -1, hy = 0;
-float sdeg = 0, mdeg = 0, hdeg = 0;
-uint16_t osx = 120, osy = 120, omx = 120, omy = 120, ohx = 120, ohy = 120;
-uint16_t x0 = 0, x1 = 0, yy0 = 0, yy1 = 0;
-uint32_t targetTime = 0;
+unsigned long previousMillis = 0; // Store the previous time to calculate FPS
+float fps = 0.0;                  // Variable to hold the FPS value
 
 bool initial = 1;
+int tftStatus = 0;
 
-void draw_clock()
-{
-  tft.init();
-  tft.setRotation(0);
-  tft.fillScreen(TFT_GREY);
-  tft.setTextColor(TFT_GREEN, TFT_GREY);
-
-  tft.fillCircle(120, 120, 122, TFT_GOLD);
-  tft.fillCircle(120, 120, 115, TFT_BLACK);
-
-  for (int i = 0; i < 360; i += 30)
-  {
-    sx = cos((i - 90) * 0.0174532925);
-    sy = sin((i - 90) * 0.0174532925);
-    x0 = sx * 115 + 120;
-    yy0 = sy * 115 + 120;
-    x1 = sx * 105 + 120;
-    yy1 = sy * 105 + 120;
-
-    tft.drawLine(x0, yy0, x1, yy1, TFT_BLUE);
-  }
-
-  for (int i = 0; i < 360; i += 6)
-  {
-    sx = cos((i - 90) * 0.0174532925);
-    sy = sin((i - 90) * 0.0174532925);
-    x0 = sx * 110 + 120;
-    yy0 = sy * 110 + 120;
-
-    tft.drawPixel(x0, yy0, TFT_BLUE);
-    if (i == 0 || i == 180)
-      tft.fillCircle(x0, yy0, 1, TFT_CYAN);
-    if (i == 0 || i == 180)
-      tft.fillCircle(x0 + 1, yy0, 1, TFT_CYAN);
-    if (i == 90 || i == 270)
-      tft.fillCircle(x0, yy0, 1, TFT_CYAN);
-    if (i == 90 || i == 270)
-      tft.fillCircle(x0 + 1, yy0, 1, TFT_CYAN);
-  }
-
-  tft.fillCircle(120, 120, 3, TFT_RED);
-
-  targetTime = millis() + 1000;
-}
-
-void draw_clock_time()
-{
-  I2C_BM8563_DateTypeDef dateStruct;
-  I2C_BM8563_TimeTypeDef timeStruct;
-
-  rtc.getDate(&dateStruct);
-  rtc.getTime(&timeStruct);
-
-  int ss = timeStruct.seconds;
-  int mm = timeStruct.minutes;
-  int hh = timeStruct.hours;
-  int dd = dateStruct.date;
-  int mmnth = dateStruct.month;
-
-  String date = (mmnth < 10 ? "0" : "") + String(mmnth) + "-" + (dd < 10 ? "0" : "") + String(dd);
-
-  tft.setTextSize(2);
-  tft.setTextDatum(TFT_TRANSPARENT);
-  tft.setTextColor(TFT_BLUE);
-  tft.drawString(date, CLOCK_R / 2, CLOCK_R * 0.5 - 30);
-
-  tft.setTextSize(2);
-  tft.setTextDatum(TFT_TRANSPARENT);
-  tft.setTextColor(TFT_WHITE);
-  tft.drawString("TFT_test", CLOCK_R / 2, CLOCK_R * 0.5);
-
-  if (targetTime < millis())
-  {
-    targetTime = millis() + 1000;
-
-    int sdeg = ss * 6;
-    int mdeg = mm * 6 + sdeg * 0.01666667;
-    int hdeg = hh * 30 + mdeg * 0.0833333;
-
-    float hx = cos((hdeg - 90) * 0.0174532925);
-    float hy = sin((hdeg - 90) * 0.0174532925);
-    float mx = cos((mdeg - 90) * 0.0174532925);
-    float my = sin((mdeg - 90) * 0.0174532925);
-    float sx = cos((sdeg - 90) * 0.0174532925);
-    float sy = sin((sdeg - 90) * 0.0174532925);
-
-    if (ss == 0 || initial)
-    {
-      initial = 0;
-      tft.drawLine(ohx, ohy, 120, 120, TFT_BLACK);
-      ohx = hx * 50 + 120;
-      ohy = hy * 50 + 120;
-      tft.drawLine(omx, omy, 120, 120, TFT_BLACK);
-      omx = mx * 70 + 120;
-      omy = my * 70 + 120;
-    }
-
-    tft.drawLine(osx, osy, 120, 120, TFT_BLACK);
-    tft.drawLine(ohx, ohy, 120, 120, TFT_WHITE);
-    tft.drawLine(omx, omy, 120, 120, TFT_WHITE);
-    osx = sx * 85 + 120;
-    osy = sy * 85 + 120;
-    tft.drawLine(osx, osy, 120, 120, TFT_RED);
-
-    tft.fillCircle(120, 120, 3, TFT_RED);
-  }
-  delay(100);
-}
+lv_coord_t touchX, touchY;
 
 void get_touch()
 {
-  lv_coord_t touchX, touchY;
-
   if (chsc6x_is_pressed())
   {
     chsc6x_get_xy(&touchX, &touchY);
@@ -172,30 +48,38 @@ void get_touch()
   }
 }
 
-/*
- * This function will be passed to Goblin3D's
- * render function to draw edges between 3D
- * points onto the 2D display.
- */
-void drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
-{
-  tft.drawLine(x1, y1, x2, y2, TFT_WHITE); // Draw a white line between the given coordinates
-}
-
-/*
- * This function will be passed to Goblin3D's
- * render function to erase edges between 3D
- * points onto the 2D display.
- */
-void eraseLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
-{
-  tft.drawLine(x1, y1, x2, y2, TFT_BLACK); // Draw a white line between the given coordinates
-}
-
 void setup()
 {
   Serial.begin(115200);
-  Serial.println("\n\nUsing the PNGdec library with touch interaction");
+
+  // Initialize the TFT display with black background color
+  tft.init();
+  tft.fillScreen(TFT_BLACK);
+
+  Serial.print("Initializing SD card...");
+
+  pinMode(D2, OUTPUT);
+  if (!SD.begin(D2))
+  {
+    Serial.println("initialization failed!");
+    return;
+  }
+  Serial.println("initialization done.");
+
+  // Load and initialize the OBJ model
+  if (objModel.load("pug.obj"))
+  {
+    objModel.setup(200.0, 120, 190); // Scale and center the model
+  }
+  else
+  {
+    Serial.println("Failed to load OBJ model.");
+    while (true)
+      ; // Halt execution if loading fails
+  }
+
+  // Initialize the sprite image
+  // img.createSprite(MAX_IMAGE_WIDTH, MAX_IMAGE_WIDTH);
 
   if (myIMU.begin() != 0)
   {
@@ -208,86 +92,41 @@ void setup()
 
   lv_xiao_touch_init();
 
-  // Define the 3D coordinates of the cube's vertices
-  float cube_points[9][3] = {
-      {-1.0, -1.0, 1.0},
-      {1.0, -1.0, 1.0},
-      {1.0, 1.0, 1.0},
-      {-1.0, 1.0, 1.0},
-      {-1.0, -1.0, -1.0},
-      {1.0, -1.0, -1.0},
-      {1.0, 1.0, -1.0},
-      {-1.0, 1.0, -1.0},
-      {0.0, 3.0, 0.0}};
-
-  // Define the edges of the cube, connecting pairs of vertices
-  uint32_t cube_edges[16][2] = {
-      {0, 1}, {1, 2}, {2, 3}, {3, 0}, // Base edges
-      {4, 5},
-      {5, 6},
-      {6, 7},
-      {7, 4}, // Top edges
-      {0, 4},
-      {1, 5},
-      {2, 6},
-      {3, 7}, // Vertical edges
-      {2, 8},
-      {3, 8},
-      {6, 8},
-      {7, 8} // Pyramid edges
-  };
-
-  // Initialize the Goblin3D object (cube) with 9 points and 16 edges
-  if (!goblin3d_init(&cube, 9, 16))
-  {
-    Serial.begin(115200);                           // Start serial communication for debugging
-    Serial.println("Failed to initialize object."); // Print error message if initialization fails
-
-    while (true)
-      ; // Halt execution if initialization fails
-  }
-
-  // Set the scaling factor for the 3D object
-  cube.scale_size = 120.0;
-  // Set the initial rotation angle around the X-axis
-  cube.x_angle_deg = 20.0;
-  // Set the initial X and Y offset to center the object on the display
-  cube.x_offset = 160;
-  cube.y_offset = 120;
-
-  // Copy the predefined cube points to the Goblin3D object's original points array
-  for (uint32_t i = 0; i < 9; i++)
-    for (uint32_t j = 0; j < 3; j++)
-      cube.orig_points[i][j] = cube_points[i][j];
-
-  // Copy the predefined cube edges to the Goblin3D object's edges array
-  for (uint32_t i = 0; i < 16; i++)
-    for (uint32_t j = 0; j < 2; j++)
-      cube.edges[i][j] = cube_edges[i][j];
-
-  // Initialize the TFT display with black background color
-  tft.init();
-  tft.fillScreen(TFT_BLACK);
-
   Serial.println("Setup complete.");
 }
 
 void loop()
 {
 
-  tft.startWrite();                  // Start the rendition SPI transaction
-  // tft.fillScreen(TFT_BLACK);         // Clear the display before drawing the new frame
-  goblin3d_render(&cube, &eraseLine); // Render the object on the TFT display
-  // Continuously update the rotation angles for a rotating effect
-  cube.x_angle_deg = fmod(cube.x_angle_deg + 1.0, 360.0); // Increment X rotation
-  cube.y_angle_deg = fmod(cube.y_angle_deg + 1.0, 360.0); // Increment Y rotation
-  cube.z_angle_deg = fmod(cube.z_angle_deg + 1.0, 360.0); // Increment Z rotation
+  unsigned long currentMillis = millis(); // Get the current time in milliseconds
 
-  goblin3d_precalculate(&cube); // Perform rendition pre-calculations
-  goblin3d_render(&cube, &drawLine); // Render the object on the TFT display
-  tft.endWrite();                    // End the SPI transaction
+  // Calculate the time difference for this frame
+  unsigned long deltaMillis = currentMillis - previousMillis;
+  previousMillis = currentMillis;
 
-  delay(20); // Sleep after ending the transaction
+  // Calculate FPS as the inverse of frame time (in seconds)
+  if (deltaMillis > 0)
+    fps = 1000.0 / deltaMillis;
+
+  tft.startWrite();
+
+  objModel.update(); // Update and render the OBJ model
+
+  // img.fillScreen(TFT_BLACK);
+  //                                   // Display the FPS on the top left of the screen
+  // img.setTextColor(TFT_GREEN);       // Set text color to white with a black background
+  // img.setTextSize(1);                // Set text size to 2
+
+  // // Calculate text width (each character is 12 pixels wide at text size 2)
+  // char buffer[10];
+  // int textWidth = img.textWidth("FPS: 00.00", 2); // Example text width at size 2
+
+  // // Set cursor to bottom center
+  // img.setCursor(((MAX_IMAGE_WIDTH - textWidth) / 2) - 40, MAX_IMAGE_WIDTH - 24); // X position centered, Y position near the bottom
+  // sprintf(buffer, "FPS: %.2f", fps);
+  // img.print(buffer); // Print FPS to the screen
+  // // Push the sprite to the TFT display
+  // img.pushSprite(10, 0);
 
   // // Accelerometer
   // Serial.print("\nAccelerometer:\n");
@@ -348,7 +187,8 @@ void loop()
   // tft.print(" Degrees F1 = ");
   // tft.println(myIMU.readTempF(), 4);
 
-  // delay(50);
+  tft.endWrite(); // End the SPI transaction
+  delay(30);
 
   get_touch();
 }
