@@ -69,7 +69,7 @@ void setup()
   // Load and initialize the OBJ model
   if (objModel.load("monkey.obj"))
   {
-    objModel.setup(200.0, 120, 120); // Scale and center the model
+    objModel.setup(150.0, 120, 150); // Scale and center the model
   }
   else
   {
@@ -109,71 +109,74 @@ void loop()
     fps = 1000.0 / deltaMillis;
 
   // tft.startWrite();
+  // Clear the sprite and draw the overlay
   img.fillScreen(TFT_BLACK);
-  //                                   // Display the FPS on the top left of the screen
-  img.setTextColor(TFT_GREEN);       // Set text color to white with a black background
-  img.setTextSize(1);                // Set text size to 2
 
-  // Calculate text width (each character is 12 pixels wide at text size 2)
+  // Draw a border around the screen for better visual separation
+  img.drawRect(0, 0, MAX_IMAGE_WIDTH, MAX_IMAGE_WIDTH, TFT_WHITE);
+
+  // Display FPS at the top center
+  img.setTextColor(TFT_GREEN);
+  img.setTextSize(1);
   char buffer[10];
-  int textWidth = img.textWidth("FPS: 00.00", 2); // Example text width at size 2
-
-  // Set cursor to bottom center
-  img.setCursor(((MAX_IMAGE_WIDTH - textWidth) / 2) - 40, MAX_IMAGE_WIDTH - 24); // X position centered, Y position near the bottom
   sprintf(buffer, "FPS: %.2f", fps);
-  img.print(buffer); // Print FPS to the screen
+  int fpsTextWidth = img.textWidth(buffer);
+  img.setCursor((MAX_IMAGE_WIDTH - fpsTextWidth) / 2, 5); // Center the FPS text
+  img.print(buffer);
 
-  // Display Accelerometer data
-  Serial.print("\nAccelerometer:\n");
-  Serial.print(" X1 = ");
-  Serial.println(myIMU.readFloatAccelX(), 4);
-  Serial.print(" Y1 = ");
-  Serial.println(myIMU.readFloatAccelY(), 4);
-  Serial.print(" Z1 = ");
-  Serial.println(myIMU.readFloatAccelZ(), 4);
-  img.setTextColor(TFT_SKYBLUE);
-  img.setCursor(10, 10);
-  img.print("Accel X: ");
+  // Draw a horizontal line to separate FPS from sensor data
+  img.drawFastHLine(10, 20, MAX_IMAGE_WIDTH - 20, TFT_WHITE);
+
+  // Display Accelerometer data in the top-left section
+  img.setTextColor(TFT_CYAN);
+  img.setCursor(MAX_IMAGE_WIDTH / 2 - 60, 25);
+  img.print("Accel:");
+  img.setCursor(MAX_IMAGE_WIDTH / 2 - 60, 35);
+  img.print("X: ");
   img.println(myIMU.readFloatAccelX(), 2);
-  img.print("Accel Y: ");
+  img.setCursor(MAX_IMAGE_WIDTH / 2 - 60, 45);
+  img.print("Y: ");
   img.println(myIMU.readFloatAccelY(), 2);
-  img.print("Accel Z: ");
+  img.setCursor(MAX_IMAGE_WIDTH / 2 - 60, 55);
+  img.print("Z: ");
   img.println(myIMU.readFloatAccelZ(), 2);
 
-  // Display Gyroscope data
-  Serial.print("\nGyroscope:\n");
-  Serial.print(" X1 = ");
-  Serial.println(myIMU.readFloatGyroX(), 4);
-  Serial.print(" Y1 = ");
-  Serial.println(myIMU.readFloatGyroY(), 4);
-  Serial.print(" Z1 = ");
-  Serial.println(myIMU.readFloatGyroZ(), 4);
+  // Draw a vertical line to separate accelerometer and gyroscope data
+  img.drawFastVLine(MAX_IMAGE_WIDTH / 2, 20, 60, TFT_WHITE);
+
+  // Display Gyroscope data in the top-right section
   img.setTextColor(TFT_GREENYELLOW);
-  img.setCursor(10, 60);
-  img.print("Gyro X: ");
+  img.setCursor(MAX_IMAGE_WIDTH / 2 + 10, 25);
+  img.print("Gyro:");
+  img.setCursor(MAX_IMAGE_WIDTH / 2 + 10, 35);
+  img.print("X: ");
   img.println(myIMU.readFloatGyroX(), 2);
-  img.print("Gyro Y: ");
+  img.setCursor(MAX_IMAGE_WIDTH / 2 + 10, 45);
+  img.print("Y: ");
   img.println(myIMU.readFloatGyroY(), 2);
-  img.print("Gyro Z: ");
+  img.setCursor(MAX_IMAGE_WIDTH / 2 + 10, 55);
+  img.print("Z: ");
   img.println(myIMU.readFloatGyroZ(), 2);
 
-  // Display Thermometer data
-  Serial.print("\nThermometer:\n");
-  Serial.print(" Degrees C1 = ");
-  Serial.println(myIMU.readTempC(), 4);
-  Serial.print(" Degrees F1 = ");
-  Serial.println(myIMU.readTempF(), 4);
+  // Draw a horizontal line to separate gyroscope and thermometer data
+  img.drawFastHLine(10, 80, MAX_IMAGE_WIDTH - 20, TFT_WHITE);
+
+  // Display Thermometer data at the bottom
   img.setTextColor(TFT_ORANGE);
-  img.setCursor(10, 110);
-  img.print("Temp C: ");
+  img.setCursor(MAX_IMAGE_WIDTH / 2 - 30, MAX_IMAGE_WIDTH - 30);
+  img.print("Temp:");
+  img.setCursor(MAX_IMAGE_WIDTH / 2 - 30, MAX_IMAGE_WIDTH - 20);
+  img.print("C: ");
   img.println(myIMU.readTempC(), 2);
-  img.print("Temp F: ");
+  img.setCursor(MAX_IMAGE_WIDTH / 2 - 30, MAX_IMAGE_WIDTH - 10);
+  img.print("F: ");
   img.println(myIMU.readTempF(), 2);
 
-  objModel.update(); // Update and render the OBJ model
+  objModel.update();
+
   // Push the sprite to the TFT display
-  img.pushSprite(40, 0);
-  
+  img.pushSprite(0, 0);
+
   // tft.endWrite(); // End the SPI transaction
   // delay(30);
 
