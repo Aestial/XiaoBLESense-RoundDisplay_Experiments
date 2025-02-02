@@ -9,6 +9,8 @@ class ObjModel
 public:
   ObjModel(TFT_eSprite &img);                              // Constructor (accepts a TFT_eSprite reference)
   bool load(const char *filename);                         // Load an OBJ file
+  void rotateEffect();                                     // Automatic rotate effect (demo)
+  void rotateYaw(float delta);          // Rotate Yaw coordinates
   void setup(float scale, float x_offset, float y_offset); // Initialize the model
   void update();                                           // Update and render the model
 

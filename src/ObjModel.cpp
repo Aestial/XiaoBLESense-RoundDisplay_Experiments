@@ -20,6 +20,11 @@ bool ObjModel::load(const char *filename)
   return true;
 }
 
+void ObjModel::rotateYaw(float delta)
+{
+  _obj.y_angle_deg += delta; // Increment Y rotation
+}
+
 // Initialize the model
 void ObjModel::setup(float scale, float x_offset, float y_offset)
 {
@@ -35,18 +40,18 @@ void ObjModel::update()
 {  
   // Render the model with black lines to erase the old frame
   // goblin3d_render(&_obj, eraseLine);
-
-  // Update the rotation angles for a rotating effect
-  _obj.x_angle_deg = fmod(_obj.x_angle_deg + 1.0, 360.0); // Increment X rotation
-  _obj.y_angle_deg = fmod(_obj.y_angle_deg + 1.0, 360.0); // Increment Y rotation
-  _obj.z_angle_deg = fmod(_obj.z_angle_deg + 1.0, 360.0); // Increment Z rotation
-
   // Perform rendition pre-calculations
   goblin3d_precalculate(&_obj);
   // Render the model with blue lines to draw the new frame
   goblin3d_render(&_obj, drawLine);
-  // Push the sprite to the TFT display
-  _img.pushSprite(0, 0);
+}
+
+void ObjModel::rotateEffect()
+{
+  // Update the rotation angles for a rotating effect
+  _obj.x_angle_deg = fmod(_obj.x_angle_deg + 1.0, 360.0); // Increment X rotation
+  _obj.y_angle_deg = fmod(_obj.y_angle_deg + 1.0, 360.0); // Increment Y rotation
+  _obj.z_angle_deg = fmod(_obj.z_angle_deg + 1.0, 360.0); // Increment Z rotation
 }
 
 // Static function to draw a line on the sprite
