@@ -19,7 +19,7 @@ void FPSDisplay::drawFPS()
   _sprite.setTextSize(1);
   char buffer[10];
   sprintf(buffer, "FPS: %.2f", _fps);
-  int fpsTextWidth = _sprite.textWidth(buffer);
-  _sprite.setCursor((MAX_IMAGE_WIDTH - fpsTextWidth) / 2, 5); // Center the FPS text
+  int width = _sprite.textWidth(buffer);
+  _sprite.setCursor((MAX_IMAGE_WIDTH - width) / 2, 5); // Center the FPS text
   _sprite.print(buffer);
 }
