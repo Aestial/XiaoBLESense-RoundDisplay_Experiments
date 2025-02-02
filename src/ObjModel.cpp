@@ -32,9 +32,7 @@ void ObjModel::setup(float scale, float x_offset, float y_offset)
 
 // Update and render the model
 void ObjModel::update()
-{
-  // Clear the sprite with a black background
-  _img.fillSprite(TFT_BLACK);  
+{  
   // Render the model with black lines to erase the old frame
   // goblin3d_render(&_obj, eraseLine);
 
