@@ -4,6 +4,7 @@
 #include <SD.h>
 #include <SPI.h>
 #include "display_conf.h"
+#include "FPSDisplay.h"
 #include "IMUDisplay.h"
 #include "ObjModel.h"
 #include "Wire.h"
@@ -17,9 +18,11 @@
 
 I2C_BM8563 rtc(I2C_BM8563_DEFAULT_ADDRESS, Wire);
 LSM6DS3 myIMU(I2C_MODE, 0x6A); // I2C device address 0x6A
+
 TFT_eSprite img(&tft); // Sprite to be used as frame buffer
-ObjModel objModel(img); // Create an instance of the ObjModel class, passing the sprite
+FPSDisplay fpsDisplay(img); // Create an instance of the FPSDisplay class
 IMUDisplay imuDisplay(img, myIMU); // Create an instance of the IMUDisplay class
+ObjModel objModel(img); // Create an instance of the ObjModel class, passing the sprite
 
 unsigned long previousMillis = 0; // Store the previous time to calculate FPS
 float fps = 0.0;                  // Variable to hold the FPS value
@@ -104,17 +107,10 @@ void loop()
   // Clear the sprite and draw the overlay
   img.fillScreen(TFT_BLACK);
 
-  // Draw a border around the screen for better visual separation
-  img.drawRect(0, 0, MAX_IMAGE_WIDTH, MAX_IMAGE_WIDTH, TFT_WHITE);
+  // TODO: Draw circular border
 
-  // Display FPS at the top center
-  img.setTextColor(TFT_GREEN);
-  img.setTextSize(1);
-  char buffer[10];
-  sprintf(buffer, "FPS: %.2f", fps);
-  int fpsTextWidth = img.textWidth(buffer);
-  img.setCursor((MAX_IMAGE_WIDTH - fpsTextWidth) / 2, 5); // Center the FPS text
-  img.print(buffer);
+  // Update and display FPS
+  fpsDisplay.update(deltaMillis);
 
   // Draw a horizontal line to separate FPS from sensor data
   img.drawFastHLine(10, 20, MAX_IMAGE_WIDTH - 20, TFT_WHITE);
