@@ -16,8 +16,8 @@
 
 I2C_BM8563 rtc(I2C_BM8563_DEFAULT_ADDRESS, Wire);
 LSM6DS3 myIMU(I2C_MODE, 0x6A); // I2C device address 0x6A
-ObjModel objModel(tft); // Create an instance of the ObjModel class
-TFT_eSprite img = TFT_eSprite(&tft); // Sprite to be used as frame buffer
+TFT_eSprite img(&tft); // Sprite to be used as frame buffer
+ObjModel objModel(img); // Create an instance of the ObjModel class, passing the sprite
 
 unsigned long previousMillis = 0; // Store the previous time to calculate FPS
 float fps = 0.0;                  // Variable to hold the FPS value
@@ -69,7 +69,7 @@ void setup()
   // Load and initialize the OBJ model
   if (objModel.load("monkey.obj"))
   {
-    objModel.setup(150.0, 120, 150); // Scale and center the model
+    objModel.setup(150.0, 120, 140); // Scale and center the model
   }
   else
   {

@@ -7,13 +7,13 @@
 class ObjModel
 {
 public:
-  ObjModel(TFT_eSPI &tft);                                 // Constructor
+  ObjModel(TFT_eSprite &img);                              // Constructor (accepts a TFT_eSprite reference)
   bool load(const char *filename);                         // Load an OBJ file
   void setup(float scale, float x_offset, float y_offset); // Initialize the model
   void update();                                           // Update and render the model
 
 private:
-  TFT_eSPI &_tft;      // Reference to the TFT display
+  TFT_eSprite &_img;   // Reference to the TFT_eSprite for rendering
   goblin3d_obj_t _obj; // Goblin3D object for the 3D model
 
   // Helper functions for rendering

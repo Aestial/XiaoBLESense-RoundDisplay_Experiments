@@ -4,7 +4,7 @@
 ObjModel *ObjModel::_instance = nullptr;
 
 // Constructor
-ObjModel::ObjModel(TFT_eSPI &tft) : _tft(tft)
+ObjModel::ObjModel(TFT_eSprite &img) : _img(img)
 {
   _instance = this; // Set the static instance to this object
 }
@@ -33,7 +33,9 @@ void ObjModel::setup(float scale, float x_offset, float y_offset)
 // Update and render the model
 void ObjModel::update()
 {
-  // Render the model with black lines to erase the previous frame
+  // Clear the sprite with a black background
+  _img.fillSprite(TFT_BLACK);  
+  // Render the model with black lines to erase the old frame
   // goblin3d_render(&_obj, eraseLine);
 
   // Update the rotation angles for a rotating effect
@@ -43,25 +45,26 @@ void ObjModel::update()
 
   // Perform rendition pre-calculations
   goblin3d_precalculate(&_obj);
-
   // Render the model with blue lines to draw the new frame
   goblin3d_render(&_obj, drawLine);
+  // Push the sprite to the TFT display
+  _img.pushSprite(0, 0);
 }
 
-// Static function to draw a line on the TFT display
+// Static function to draw a line on the sprite
 void ObjModel::drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 {
   if (_instance)
   {
-    _instance->_tft.drawLine(x1, y1, x2, y2, TFT_GOLD);
+    _instance->_img.drawLine(x1, y1, x2, y2, TFT_SKYBLUE);
   }
 }
 
-// Static function to erase a line on the TFT display
+// Static function to erase a line on the sprite
 void ObjModel::eraseLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 {
   if (_instance)
   {
-    _instance->_tft.drawLine(x1, y1, x2, y2, TFT_BLACK);
+    _instance->_img.drawLine(x1, y1, x2, y2, TFT_BLACK);
   }
 }
