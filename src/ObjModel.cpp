@@ -34,7 +34,7 @@ void ObjModel::setup(float scale, float x_offset, float y_offset)
 void ObjModel::update()
 {
   // Render the model with black lines to erase the previous frame
-  goblin3d_render(&_obj, eraseLine);
+  // goblin3d_render(&_obj, eraseLine);
 
   // Update the rotation angles for a rotating effect
   _obj.x_angle_deg = fmod(_obj.x_angle_deg + 1.0, 360.0); // Increment X rotation
@@ -53,7 +53,7 @@ void ObjModel::drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2)
 {
   if (_instance)
   {
-    _instance->_tft.drawLine(x1, y1, x2, y2, TFT_SKYBLUE);
+    _instance->_tft.drawLine(x1, y1, x2, y2, TFT_GOLD);
   }
 }
 
