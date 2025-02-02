@@ -1,0 +1,1 @@
+#define MAX_IMAGE_WIDTH 240
