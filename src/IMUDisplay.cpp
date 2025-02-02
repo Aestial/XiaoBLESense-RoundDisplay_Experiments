@@ -31,6 +31,9 @@ void IMUDisplay::update()
 
   // Draw Thermometer data
   drawThermometerData();
+
+  // Draw a horizontal line to separate gyroscope and thermometer data
+  _sprite.drawFastHLine(20, MAX_IMAGE_WIDTH - 35, MAX_IMAGE_WIDTH - 40, TFT_WHITE);
 }
 
 void IMUDisplay::drawAccelerometerData()
@@ -68,12 +71,12 @@ void IMUDisplay::drawGyroscopeData()
 void IMUDisplay::drawThermometerData()
 {
   _sprite.setTextColor(TFT_ORANGE);
-  _sprite.setCursor(MAX_IMAGE_WIDTH / 2 - 30, MAX_IMAGE_WIDTH - 30);
+  _sprite.setCursor(MAX_IMAGE_WIDTH / 2 - 25, MAX_IMAGE_WIDTH - 30);
   _sprite.print("Temp:");
-  _sprite.setCursor(MAX_IMAGE_WIDTH / 2 - 30, MAX_IMAGE_WIDTH - 20);
+  _sprite.setCursor(MAX_IMAGE_WIDTH / 2 - 25, MAX_IMAGE_WIDTH - 20);
   _sprite.print("C: ");
   _sprite.println(_imu.readTempC(), 2);
-  _sprite.setCursor(MAX_IMAGE_WIDTH / 2 - 30, MAX_IMAGE_WIDTH - 10);
+  _sprite.setCursor(MAX_IMAGE_WIDTH / 2 - 25, MAX_IMAGE_WIDTH - 10);
   _sprite.print("F: ");
   _sprite.println(_imu.readTempF(), 2);
 }
