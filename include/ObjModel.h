@@ -10,13 +10,15 @@ public:
   ObjModel(TFT_eSprite &img);                              // Constructor (accepts a TFT_eSprite reference)
   bool load(const char *filename);                         // Load an OBJ file
   void rotateEffect();                                     // Automatic rotate effect (demo)
-  void rotateYaw(float delta);          // Rotate Yaw coordinates
+  void rotateYaw(float delta);                             // Rotate Yaw coordinates
+  void setModelName(const String &modelName);              // Set the model name dynamically
   void setup(float scale, float x_offset, float y_offset); // Initialize the model
   void update();                                           // Update and render the model
 
 private:
   TFT_eSprite &_img;   // Reference to the TFT_eSprite for rendering
   goblin3d_obj_t _obj; // Goblin3D object for the 3D model
+  String _modelName; // Current model name
 
   // Helper functions for rendering
   static void drawLine(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);

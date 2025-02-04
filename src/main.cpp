@@ -9,6 +9,8 @@
 #include "ObjModel.h"
 #include "Wire.h"
 
+#include "BLEManager.h"
+
 #define SD_CS_PIN D2
 #define TFT_GREY 0xBDF7
 
@@ -25,6 +27,7 @@ TFT_eSprite img(&tft); // Sprite to be used as frame buffer
 FPSDisplay fpsDisplay(img); // Create an instance of the FPSDisplay class
 IMUDisplay imuDisplay(img, myIMU); // Create an instance of the IMUDisplay class
 ObjModel objModel(img); // Create an instance of the ObjModel class, passing the sprite
+BLEManager bleManager;  // Create an instance of the BLEManager class
 
 // Store the previous time to calculate FPS
 unsigned long previousMillis = 0;
@@ -127,7 +130,13 @@ void setup()
     while (true)
       ; // Halt execution if loading fails
   }
-  
+
+  // Initialize BLE and set the callback for model name updates
+  bleManager.begin("3D-Model-Updater", [](const String &modelName)
+  {
+    objModel.setModelName(modelName); // Update the model name dynamically
+  });
+
   lv_xiao_touch_init();
 
   Serial.println("Setup complete.");
