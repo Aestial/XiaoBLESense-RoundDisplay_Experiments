@@ -16,7 +16,7 @@
 #define USE_TFT_ESPI_LIBRARY
 #include "lv_xiao_round_screen.h"
 
-#define TOUCH_SENSITIVITY -0.5
+#define TOUCH_SENSITIVITY -0.35
 
 I2C_BM8563 rtc(I2C_BM8563_DEFAULT_ADDRESS, Wire);
 LSM6DS3 myIMU(I2C_MODE, 0x6A); // I2C device address 0x6A
