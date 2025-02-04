@@ -26,7 +26,7 @@ LSM6DS3 myIMU(I2C_MODE, 0x6A); // I2C device address 0x6A
 TFT_eSprite img(&tft); // Sprite to be used as frame buffer
 FPSDisplay fpsDisplay(img); // Create an instance of the FPSDisplay class
 IMUDisplay imuDisplay(img, myIMU); // Create an instance of the IMUDisplay class
-ObjModel objModel(img); // Create an instance of the ObjModel class, passing the sprite
+ObjModel objModel(img, "cupcake.obj"); // Create an instance of the ObjModel class, passing the sprite
 BLEManager bleManager;  // Create an instance of the BLEManager class
 
 // Store the previous time to calculate FPS
@@ -119,20 +119,10 @@ void setup()
   // Initialize the IMU display
   imuDisplay.begin();
 
-  // Load and initialize the OBJ model
-  if (objModel.load("monkey.obj"))
-  {
-    objModel.setup(150.0, 120, 140); // Scale and center the model
-  }
-  else
-  {
-    Serial.println("Failed to load OBJ model.");
-    while (true)
-      ; // Halt execution if loading fails
-  }
+  objModel.setup(150.0, 120, 140); // Scale and center the model
 
   // Initialize BLE and set the callback for model name updates
-  bleManager.begin("3D-Model-Updater", [](const String &modelName)
+  bleManager.begin("3D-Model-Updater", [](const std::string &modelName)
   {
     objModel.setModelName(modelName); // Update the model name dynamically
   });
@@ -169,5 +159,9 @@ void loop()
 
   // Push the sprite to the TFT display
   img.pushSprite(0, 0);
-  delay(30);
+
+  // Update BLE
+  bleManager.update();
+
+  delay(25);
 }

@@ -3,10 +3,15 @@
 // Initialize the static instance pointer
 ObjModel *ObjModel::_instance = nullptr;
 
-// Constructor
-ObjModel::ObjModel(TFT_eSprite &img) : _img(img), _modelName("monkey.obj")
+// Constructors
+ObjModel::ObjModel(TFT_eSprite &img, const char *filename) : _img(img), _modelName(filename)
 {
   _instance = this; // Set the static instance to this object
+}
+
+ObjModel::ObjModel(TFT_eSprite &img) : _img(img), _modelName("monkey.obj")
+{
+  _instance = this; 
 }
 
 // Load an OBJ file
@@ -21,7 +26,7 @@ bool ObjModel::load(const char *filename)
 }
 
 // Set the model name dynamically
-void ObjModel::setModelName(const String& modelName)
+void ObjModel::setModelName(const std::string &modelName)
 {
   _modelName = modelName;
   load(_modelName.c_str()); // Reload the new model
