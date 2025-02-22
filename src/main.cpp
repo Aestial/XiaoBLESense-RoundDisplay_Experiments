@@ -26,7 +26,7 @@ LSM6DS3 myIMU(I2C_MODE, 0x6A); // I2C device address 0x6A
 TFT_eSprite img(&tft); // Sprite to be used as frame buffer
 FPSDisplay fpsDisplay(img); // Create an instance of the FPSDisplay class
 IMUDisplay imuDisplay(img, myIMU); // Create an instance of the IMUDisplay class
-ObjModel objModel(img, "cupcake.obj"); // Create an instance of the ObjModel class, passing the sprite
+ObjModel objModel(img, "burger.obj"); // Create an instance of the ObjModel class, passing the sprite
 BLEManager bleManager;  // Create an instance of the BLEManager class
 
 // Store the previous time to calculate FPS
@@ -110,7 +110,6 @@ void setup()
   if (!SD.begin(D2))
   {
     Serial.println("initialization failed!");
-    return;
   }
   Serial.println("initialization done.");
 
