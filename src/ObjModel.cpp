@@ -3,10 +3,15 @@
 // Initialize the static instance pointer
 ObjModel *ObjModel::_instance = nullptr;
 
-// Constructor
-ObjModel::ObjModel(TFT_eSprite &img) : _img(img)
+// Constructors
+ObjModel::ObjModel(TFT_eSprite &img, const char *filename) : _img(img), _modelName(filename)
 {
   _instance = this; // Set the static instance to this object
+}
+
+ObjModel::ObjModel(TFT_eSprite &img) : _img(img), _modelName("monkey.obj")
+{
+  _instance = this; 
 }
 
 // Load an OBJ file
@@ -20,9 +25,11 @@ bool ObjModel::load(const char *filename)
   return true;
 }
 
-void ObjModel::rotateYaw(float delta)
+// Set the model name dynamically
+void ObjModel::setModelName(const std::string &modelName)
 {
-  _obj.y_angle_deg += delta; // Increment Y rotation
+  _modelName = modelName;
+  load(_modelName.c_str()); // Reload the new model
 }
 
 // Initialize the model
@@ -33,6 +40,9 @@ void ObjModel::setup(float scale, float x_offset, float y_offset)
   // Set the initial X and Y offset to center the object on the display
   _obj.x_offset = x_offset;
   _obj.y_offset = y_offset;
+
+  // Load the initial model
+  load(_modelName.c_str());
 }
 
 // Update and render the model
@@ -52,6 +62,11 @@ void ObjModel::rotateEffect()
   _obj.x_angle_deg = fmod(_obj.x_angle_deg + 1.0, 360.0); // Increment X rotation
   _obj.y_angle_deg = fmod(_obj.y_angle_deg + 1.0, 360.0); // Increment Y rotation
   _obj.z_angle_deg = fmod(_obj.z_angle_deg + 1.0, 360.0); // Increment Z rotation
+}
+
+void ObjModel::rotateYaw(float delta)
+{
+  _obj.y_angle_deg += delta; // Increment Y rotation
 }
 
 // Static function to draw a line on the sprite
