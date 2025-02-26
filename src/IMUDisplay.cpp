@@ -1,3 +1,4 @@
+#ifdef __BLESENSE__
 #include "IMUDisplay.h"
 
 IMUDisplay::IMUDisplay(TFT_eSprite &sprite, LSM6DS3 &imu)
@@ -80,3 +81,5 @@ void IMUDisplay::drawThermometerData()
   _sprite.print("F: ");
   _sprite.println(_imu.readTempF(), 2);
 }
+
+#endif

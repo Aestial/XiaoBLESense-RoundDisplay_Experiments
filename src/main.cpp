@@ -1,15 +1,20 @@
 #include <goblin3d.h> // Goblin3D library for 3D rendering
 #include <I2C_BM8563.h>
-#include "LSM6DS3.h"
 #include <SD.h>
 #include <SPI.h>
 #include "display_conf.h"
 #include "FPSDisplay.h"
-#include "IMUDisplay.h"
 #include "ObjModel.h"
 #include "Wire.h"
 
+#ifdef __BLE_ENABLED__
 #include "BLEManager.h"
+BLEManager bleManager;  // Create an instance of the BLEManager class
+#endif
+#ifdef __BLESENSE__
+#include "LSM6DS3.h"
+#include "IMUDisplay.h"
+#endif
 
 #define SD_CS_PIN D2
 #define TFT_GREY 0xBDF7
@@ -21,13 +26,15 @@
 #define TOUCH_SENSITIVITY -0.35
 
 I2C_BM8563 rtc(I2C_BM8563_DEFAULT_ADDRESS, Wire);
-LSM6DS3 myIMU(I2C_MODE, 0x6A); // I2C device address 0x6A
 
 TFT_eSprite img(&tft); // Sprite to be used as frame buffer
 FPSDisplay fpsDisplay(img); // Create an instance of the FPSDisplay class
+ObjModel objModel(img, "/ak47.obj"); // Create an instance of the ObjModel class, passing the sprite
+
+#ifdef __BLESENSE__
+LSM6DS3 myIMU(I2C_MODE, 0x6A); // I2C device address 0x6A
 IMUDisplay imuDisplay(img, myIMU); // Create an instance of the IMUDisplay class
-ObjModel objModel(img, "burger.obj"); // Create an instance of the ObjModel class, passing the sprite
-BLEManager bleManager;  // Create an instance of the BLEManager class
+#endif
 
 // Store the previous time to calculate FPS
 unsigned long previousMillis = 0;
@@ -115,16 +122,21 @@ void setup()
 
   // Initialize the sprite image
   img.createSprite(MAX_IMAGE_WIDTH, MAX_IMAGE_WIDTH);
+
+#ifdef __BLESENSE__
   // Initialize the IMU display
   imuDisplay.begin();
+#endif
 
   objModel.setup(150.0, 120, 140); // Scale and center the model
 
+#ifdef __BLE_ENABLED__
   // Initialize BLE and set the callback for model name updates
   bleManager.begin("3D-Model-Updater", [](const std::string &modelName)
   {
     objModel.setModelName(modelName); // Update the model name dynamically
   });
+#endif
 
   lv_xiao_touch_init();
 
@@ -147,9 +159,12 @@ void loop()
   fpsDisplay.update(deltaMillis);
   // Draw a horizontal line to separate FPS from sensor data
   img.drawFastHLine(10, 20, MAX_IMAGE_WIDTH - 20, TFT_WHITE);
-
+  
+#ifdef __BLESENSE__
   // Update and display IMU data
   imuDisplay.update();
+#endif
+
   // Update and display 3D model
   objModel.rotateYaw(smoothed_delta_x * TOUCH_SENSITIVITY);
   objModel.update();
@@ -159,8 +174,10 @@ void loop()
   // Push the sprite to the TFT display
   img.pushSprite(0, 0);
 
+#ifdef __BLE_ENABLED__
   // Update BLE
   bleManager.update();
+#endif
 
   delay(25);
 }

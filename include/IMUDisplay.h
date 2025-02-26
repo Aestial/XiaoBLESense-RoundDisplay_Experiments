@@ -1,3 +1,5 @@
+#ifdef __BLESENSE__
+
 #ifndef IMUDISPLAY_H
 #define IMUDISPLAY_H
 
@@ -19,5 +21,7 @@ private:
   void drawGyroscopeData();
   void drawThermometerData();
 };
+
+#endif
 
 #endif
