@@ -29,7 +29,7 @@ I2C_BM8563 rtc(I2C_BM8563_DEFAULT_ADDRESS, Wire);
 
 TFT_eSprite img(&tft); // Sprite to be used as frame buffer
 FPSDisplay fpsDisplay(img); // Create an instance of the FPSDisplay class
-ObjModel objModel(img, "/ak47.obj"); // Create an instance of the ObjModel class, passing the sprite
+ObjModel objModel(img, "/burger.obj"); // Create an instance of the ObjModel class, passing the sprite
 
 #ifdef __BLESENSE__
 LSM6DS3 myIMU(I2C_MODE, 0x6A); // I2C device address 0x6A
